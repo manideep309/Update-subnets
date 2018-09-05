@@ -1,0 +1,15 @@
+#!/bin/bash
+
+dc_array=("x y z")
+
+for dc in ${dc_array[@]}; do
+
+DC_SUBNET="$(curl -s -X GET -u "admin:admin42" 'https://inventory.com/api/1.0/subnets/?service_level=production&format=json' --insecure 'https://inventory.com/api/1.0/subnets/?offset=1001' --insecure |jq 'select(length>0).subnets[] .name' |grep ${dc} |awk NF |sort |uniq |sed '$!s/$/,/g' |sed '1i [' |sed '$a]' |grep -v "\"\"")"
+
+   if [[ ${DC_SUBNET} != "" ]] ; then
+      echo "${DC_SUBNET}" > /tmp/subnetfile.json
+   else
+      echo "No subnet list returned from inventory for desired ${dc}"
+   fi
+
+done
